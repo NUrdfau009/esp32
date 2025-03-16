@@ -9,6 +9,7 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
+            text-align: center;
         }
 
         #statusText {
@@ -18,11 +19,29 @@
         }
 
         .square {
-            margin-top: 20px;
+            margin: 20px auto;
             width: 100px;
             height: 100px;
             background-color: #17df28;
             transition: background-color 0.5s;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
         }
     </style>
 
@@ -30,7 +49,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
-        // Firebase конфигурациясы
         const firebaseConfig = {
             apiKey: "AIzaSyAQA-vxliblFCYzTDJKxN25OlX24VJvlpY",
             authDomain: "esp8266-3-5a153.firebaseapp.com",
@@ -41,12 +59,11 @@
             appId: "1:779012342564:web:0e77ddb1ac644f037b29b1"
         };
 
-        // Firebase бастау
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
         function fetchData() {
-            const pressureRef = ref(database, 'pressure/value'); // Firebase-тегі қысым мәні
+            const pressureRef = ref(database, 'pressure/value');
 
             get(pressureRef).then((snapshot) => {
                 if (snapshot.exists()) {
@@ -54,7 +71,6 @@
                     const square = document.querySelector('.square');
                     const statusText = document.getElementById('statusText');
 
-                    // Егер қысым жоғары (мысалы, > 600) болса – қызыл
                     if (pressureValue > 600) {
                         square.style.backgroundColor = 'red';
                         statusText.innerText = "Науқас орнынан тұрды!";
@@ -78,5 +94,8 @@
     <h1> Науқас жағдайы</h1>
     <div id="statusText">Қысым деректерін күту...</div>
     <div class="square"></div>
+
+    <!-- 🔹 GPS сайтын ашатын баттон -->
+    <a href="https://nurdfau009.github.io/esp32site-gps/" target="_blank" class="btn">Науқастың орнын білу</a>
 </body>
 </html>
