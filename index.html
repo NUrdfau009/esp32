@@ -1,82 +1,82 @@
 <!DOCTYPE html>
-<html lang="kk">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPS Трекер Карта</title>
-
-    <!-- Google Maps API -->
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB0bdK0_mwwjL99vJAYI0y628j_8dOLGHI&callback=initMap"></script>
+    <title>Құрылғы</title>
 
     <style>
-        #map { height: 500px; width: 100%; }
-    </style>
-</head>
-<body>
-    <h1>GPS Трекер Карта</h1>
-    <div id="map"></div>
-
-    <script>
-        let map, marker;
-
-        function initMap() {
-            map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 15,
-                center: { lat: 0, lng: 0 } // Уақытша координата (кейін Firebase жаңартады)
-            });
-
-            marker = new google.maps.Marker({
-                position: { lat: 0, lng: 0 },
-                map: map,
-                title: "GPS Орны"
-            });
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
         }
 
-        // 🔥 initMap-ты глобалдық деңгейге шығару
-        window.initMap = initMap;
-    </script>
+        #statusText {
+            padding: 10px;
+            font-size: 24px;
+            font-weight: bold;
+        }
 
-    <!-- Firebase SDK -->
+        .square {
+            margin-top: 20px;
+            width: 100px;
+            height: 100px;
+            background-color: #17df28;
+            transition: background-color 0.5s;
+        }
+    </style>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
+        // Firebase конфигурациясы
         const firebaseConfig = {
-            apiKey: "AIzaSyAg8l14Q6quOVCRPcWELN0VPL-pyKWWdwA",
-            authDomain: "gps-90a08.firebaseapp.com",
-            databaseURL: "https://gps-90a08-default-rtdb.firebaseio.com",
-            projectId: "gps-90a08",
-            storageBucket: "gps-90a08.firebasestorage.app",
-            messagingSenderId: "364869491896",
-            appId: "1:364869491896:web:a270791afd2d528e3de84d"
+            apiKey: "AIzaSyAQA-vxliblFCYzTDJKxN25OlX24VJvlpY",
+            authDomain: "esp8266-3-5a153.firebaseapp.com",
+            databaseURL: "https://esp8266-3-5a153-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "esp8266-3-5a153",
+            storageBucket: "esp8266-3-5a153.firebasestorage.app",
+            messageSenderId: "779012342564",
+            appId: "1:779012342564:web:0e77ddb1ac644f037b29b1"
         };
 
+        // Firebase бастау
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        // Firebase арқылы деректерді жаңарту
-        const gpsRef = ref(database, "/gps");
-        onValue(gpsRef, (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                if (!map) {
-                    map = new google.maps.Map(document.getElementById("map"), {
-                        zoom: 15,
-                        center: { lat: data.latitude, lng: data.longitude }
-                    });
+        function fetchData() {
+            const pressureRef = ref(database, 'pressure/value'); // Firebase-тегі қысым мәні
 
-                    marker = new google.maps.Marker({
-                        position: { lat: data.latitude, lng: data.longitude },
-                        map: map,
-                        title: "GPS Орны"
-                    });
+            get(pressureRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const pressureValue = snapshot.val();
+                    const square = document.querySelector('.square');
+                    const statusText = document.getElementById('statusText');
+
+                    // Егер қысым жоғары (мысалы, > 600) болса – қызыл
+                    if (pressureValue > 600) {
+                        square.style.backgroundColor = 'red';
+                        statusText.innerText = "Науқас орнынан тұрды!";
+                    } else {
+                        square.style.backgroundColor = '#17df28';
+                        statusText.innerText = "Науқас орнында";
+                    }
                 } else {
-                    map.setCenter({ lat: data.latitude, lng: data.longitude });
-                    marker.setPosition({ lat: data.latitude, lng: data.longitude });
+                    console.log("Қысым мәні табылмады");
                 }
-            }
-        });
-    </script>
+            }).catch((error) => {
+                console.error("Қате: ", error);
+            });
+        }
 
+        setInterval(fetchData, 500);
+        window.onload = fetchData;
+    </script>
+</head>
+<body>
+    <h1> Науқас жағдайы</h1>
+    <div id="statusText">Қысым деректерін күту...</div>
+    <div class="square"></div>
 </body>
 </html>
